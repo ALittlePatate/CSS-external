@@ -6,7 +6,7 @@ Also i only use RPM so i don't write anything to the game, i still open a handle
 The code isn't very good nor optimized but at least i have the good offsets.<br>
 
 # Features
-* Ally/Ennemy ESP
+* Ally/Enemy ESP
 * Skeleton ESP
 * Box ESP
 * Healthbar
