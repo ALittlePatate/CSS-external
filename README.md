@@ -2,7 +2,8 @@
 A simple CS:S external cheat
 
 This cheat is based of [ImGuiExternal](https://github.com/furkankadirguzeloglu/ImGuiExternal) which is the overlay part of the program.<br>
-The code isn't very good nor optimized but at least i have the good offsets.
+Also i only use RPM so i don't write anything to the game, i still open a handle and ReadProcessMemory but it's fine for CS:S ig.<br>
+The code isn't very good nor optimized but at least i have the good offsets.<br>
 
 # Features
 * Ally/Ennemy ESP
