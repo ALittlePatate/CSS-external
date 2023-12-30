@@ -19,6 +19,10 @@ bool enemy_name = true;
 bool crosshair = true;
 bool ImGui_Initialised = false;
 bool CreateConsole = false;
+bool aimbot = true;
+bool show_fov = true;
+float aim_fov = 10.f;
+float smooth = 75.f;
 
 namespace OverlayWindow {
 	WNDCLASSEX WindowClass;
@@ -32,6 +36,31 @@ namespace DirectX9Interface {
 	D3DPRESENT_PARAMETERS pParams = { NULL };
 	MARGINS Margin = { -1 };
 	MSG Message = { NULL };
+}
+
+void DoAimbot(Vector3 headpos, float factor, bool show_fov) {
+	float fov = (factor / ((30 - aim_fov) - factor)) * 100;
+	float aimX = headpos.x - Process::WindowWidth / 2;
+	float aimY = headpos.y - Process::WindowHeight / 2;
+
+	if (show_fov) {
+		RGBA White = { 255, 255, 255, 255 };
+		DrawCircle((int)headpos.x, (int)headpos.y, fov, &White);
+	}
+	if (!aimbot || ShowMenu)
+		return;
+	if (!GetAsyncKeyState(VK_HOME) && !GetAsyncKeyState(VK_LBUTTON))
+		return;
+
+	if (abs(aimX) < fov && abs(aimY) < fov) {
+		if (smooth == 0) {
+			aimX *= 4;
+			aimY *= 4;
+		}
+		aimX *= (100 - smooth) / 100;
+		aimY *= (100 - smooth) / 100;
+		mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, aimX, aimY, 0, 0);
+	}
 }
 
 void Draw() {
@@ -105,6 +134,15 @@ void Draw() {
 			continue;
 		}
 
+		Vector3 neckpos = GetBonePos(bonematrix_addr, BoneID::HEAD);
+		neckpos.z += 5.f;
+		neckpos.y -= 2.f;
+		Vector3 w2s_neckpos;
+
+		if (!WorldToScreen(neckpos, w2s_neckpos)) {
+			continue;
+		}
+		DoAimbot(w2s_neckpos, sqrt(abs(w2s_headpos.x - w2s_neckpos.x) + abs(w2s_headpos.y - w2s_neckpos.y)), show_fov);
 
 #ifdef  _DEBUG
 		char ent_text[256];
@@ -152,6 +190,13 @@ void DrawMenu() {
 	ImGui::Checkbox("Skeleton##enemy", &enemy_skeleton);
 	ImGui::Checkbox("Healthbar##enemy", &enemy_esp_health_bar);
 	ImGui::Checkbox("Name##enemy", &enemy_name);
+
+	ImGui::Separator();
+	ImGui::Checkbox("Aimbot", &aimbot);
+	ImGui::SameLine();
+	ImGui::Checkbox("Show FOV", &show_fov);
+	ImGui::SliderFloat("FOV", &aim_fov, 1.f, 30.f, "%1.f", 1.f);
+	ImGui::SliderFloat("Smoothing", &smooth, 0.f, 100.f, "%1.f", 1.f);
 
 	ImGui::Separator();
 	if (ImGui::Button("Unhook")) {

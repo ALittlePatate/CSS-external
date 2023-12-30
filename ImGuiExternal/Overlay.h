@@ -156,7 +156,7 @@ void DrawCircleFilled(int x, int y, int radius, RGBA* color) {
 	ImGui::GetOverlayDrawList()->AddCircleFilled(ImVec2(x, y), radius, ImGui::ColorConvertFloat4ToU32(ImVec4(color->R / 255.0, color->G / 255.0, color->B / 255.0, color->A / 255.0)));
 }
 
-void DrawCircle(int x, int y, int radius, RGBA* color, int segments) {
+void DrawCircle(int x, int y, int radius, RGBA* color, int segments = 0) {
 	ImGui::GetOverlayDrawList()->AddCircle(ImVec2(x, y), radius, ImGui::ColorConvertFloat4ToU32(ImVec4(color->R / 255.0, color->G / 255.0, color->B / 255.0, color->A / 255.0)), segments);
 }
 
