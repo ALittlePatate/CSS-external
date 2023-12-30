@@ -67,7 +67,7 @@ void Draw() {
 	RGBA Cyan = { 0, 231, 255, 255 };
 	if (crosshair) DrawCircleFilled(Process::WindowWidth/2, Process::WindowHeight/2, 3, &Cyan);
 
-	if (!ally_esp && !enemy_esp) {
+	if (!ally_esp && !enemy_esp && !aimbot && !show_fov) {
 		return;
 	}
 
