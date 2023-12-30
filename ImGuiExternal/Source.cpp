@@ -153,19 +153,19 @@ void Draw() {
 		
 
 		RGBA color = { 255, 255, 255, 255 };
-		if ((ent_team == localplayer_team && ally_box) || (ent_team != localplayer_team && enemy_box)) {
+		if ((ent_team == localplayer_team && ally_box && ally_esp) || (ent_team != localplayer_team && enemy_box && enemy_esp)) {
 			DrawEspBox2D(w2s_absOrigin, w2s_headpos, &color, 1);
 		}
 
-		if ((ent_team == localplayer_team && ally_name) || (ent_team != localplayer_team && enemy_name)) {
+		if ((ent_team == localplayer_team && ally_name && ally_esp) || (ent_team != localplayer_team && enemy_name && enemy_esp)) {
 			DrawNameTag(w2s_absOrigin, w2s_headpos, name);
 		}
 
-		if ((ent_team == localplayer_team && ally_esp_health_bar) || (ent_team != localplayer_team && enemy_esp_health_bar)) {
+		if ((ent_team == localplayer_team && ally_esp_health_bar && ally_esp) || (ent_team != localplayer_team && enemy_esp_health_bar && enemy_esp)) {
 			DrawHealthBar(w2s_absOrigin, w2s_headpos, health);
 		}
 
-		if ((ent_team == localplayer_team && ally_skeleton) || (ent_team != localplayer_team && enemy_skeleton)) {
+		if ((ent_team == localplayer_team && ally_skeleton && ally_esp) || (ent_team != localplayer_team && enemy_skeleton && enemy_esp)) {
 			DrawBones(bonematrix_addr, &color, 1);
 		}
 	}
