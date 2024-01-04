@@ -94,6 +94,8 @@ void Draw() {
 	if (map_name[0] == '\0')
 		return;
 	if (std::string(map_name) != map_name_old || !parsed_map) {
+		if (parsed_map)
+			_bsp_parser.unload_map();
 		parsed_map = _bsp_parser.load_map(std::string(Game::path) + std::string("cstrike\\maps"), map_name);
 		map_name_old = std::string(map_name);
 	}
