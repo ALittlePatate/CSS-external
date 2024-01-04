@@ -39,6 +39,8 @@ namespace DirectX9Interface {
 }
 
 void DoAimbot(Vector3 headpos, float factor, bool show_fov) {
+	if (factor > 16.f)
+		return;
 	float fov = (factor / ((30 - aim_fov) - factor)) * 100;
 	float aimX = headpos.x - Process::WindowWidth / 2;
 	float aimY = headpos.y - Process::WindowHeight / 2;
@@ -142,7 +144,7 @@ void Draw() {
 		if (!WorldToScreen(neckpos, w2s_neckpos)) {
 			continue;
 		}
-		DoAimbot(w2s_neckpos, sqrt(abs(w2s_headpos.x - w2s_neckpos.x) + abs(w2s_headpos.y - w2s_neckpos.y)), show_fov);
+		DoAimbot(w2s_neckpos, sqrt(abs(w2s_headpos.y - w2s_neckpos.y)), show_fov);
 
 #ifdef  _DEBUG
 		char ent_text[256];
