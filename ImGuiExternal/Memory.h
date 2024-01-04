@@ -14,6 +14,7 @@
 #define LIFESTATE 0x93 //player
 #define BONEMATRIX 0x578 //player https://youtu.be/elKUMiqitxY
 #define VIEW_MATRIX 0x5B0D68 //engine
+#define MAP_NAME 0x47796D //engine
 
 class Vector3 {
 public:
@@ -45,6 +46,7 @@ namespace Game {
     HANDLE handle = NULL;
     uintptr_t client = NULL;
     uintptr_t engine = NULL;
+    char path[MAX_PATH];
     DWORD PID = 0;
 }
 

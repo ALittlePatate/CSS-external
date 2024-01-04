@@ -1,0 +1,3 @@
+[submodule "ImGuiExternal/valve-bsp-parser"]
+	path = ImGuiExternal/valve-bsp-parser
+	url = https://github.com/ReactiioN1337/valve-bsp-parser

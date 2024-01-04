@@ -1,3 +1,4 @@
+#include <valve-bsp-parser/bsp_parser.hpp>
 #include "xorstr.hpp"
 #include "Functions.h"
 #include "Memory.h"
@@ -16,13 +17,18 @@ bool ally_esp_health_bar = false;
 bool enemy_esp_health_bar = true;
 bool ally_name = false;
 bool enemy_name = true;
+bool enemy_esp_visible = false;
+bool ally_esp_visible = false;
 bool crosshair = true;
 bool ImGui_Initialised = false;
 bool CreateConsole = false;
 bool aimbot = true;
 bool show_fov = true;
 float aim_fov = 10.f;
+bool aim_visible = true;
 float smooth = 75.f;
+
+using namespace rn;
 
 namespace OverlayWindow {
 	WNDCLASSEX WindowClass;
@@ -38,13 +44,13 @@ namespace DirectX9Interface {
 	MSG Message = { NULL };
 }
 
-void DoAimbot(Vector3 headpos, float factor, bool show_fov) {
-	if (factor > 16.f)
+bsp_parser _bsp_parser;
+void DoAimbot(Vector3 headpos, float factor, bool show_fov, bool is_visible) {
+	if (factor > 16.f || (!is_visible && aim_visible))
 		return;
 	float fov = (factor / ((30 - aim_fov) - factor)) * 100;
 	float aimX = headpos.x - Process::WindowWidth / 2;
 	float aimY = headpos.y - Process::WindowHeight / 2;
-
 	if (show_fov) {
 		RGBA White = { 255, 255, 255, 255 };
 		DrawCircle((int)headpos.x, (int)headpos.y, fov, &White);
@@ -69,6 +75,23 @@ void Draw() {
 	RGBA Cyan = { 0, 231, 255, 255 };
 	if (crosshair) DrawCircleFilled(Process::WindowWidth/2, Process::WindowHeight/2, 3, &Cyan);
 
+	char map_name[256];
+	static bool parsed_map = false;
+	static std::string map_name_old = "";
+	for (int j = 0; j < 256; j++) {
+		char c = RPM<char>(Game::engine + MAP_NAME + j*sizeof(char));
+		if (c == '\0') {
+			map_name[j] = '\0';
+			break;
+		}
+		map_name[j] = c;
+	}
+
+	if (std::string(map_name) != map_name_old || !parsed_map) {
+		parsed_map = _bsp_parser.load_map(std::string(Game::path) + std::string("cstrike\\maps"), map_name);
+		map_name_old = std::string(map_name);
+	}
+
 	if (!ally_esp && !enemy_esp && !aimbot && !show_fov) {
 		return;
 	}
@@ -80,6 +103,7 @@ void Draw() {
 
 	uintptr_t entity_list = Game::client + ENTITY_LIST;
 	uintptr_t localplayer = RPM<uintptr_t>(Game::client + LOCALPLAYER);
+	Vector3 pos = RPM<Vector3>(localplayer + XYZ);
 	int localplayer_team = RPM<uintptr_t>(localplayer + TEAM);
 	int ent_idx = 0;
 
@@ -110,6 +134,7 @@ void Draw() {
 			continue;
 		}
 
+		bool is_visible = _bsp_parser.is_visible(vector3{ pos.x, pos.y, pos.z + 66 }, vector3{ absOrigin.x, absOrigin.y, absOrigin.z + 66 });
 		
 		//getting name
 		DWORD list = RPM<DWORD>(Game::client + NAME_LIST) + 0x38;
@@ -144,30 +169,35 @@ void Draw() {
 		if (!WorldToScreen(neckpos, w2s_neckpos)) {
 			continue;
 		}
-		DoAimbot(w2s_neckpos, sqrt(abs(w2s_headpos.y - w2s_neckpos.y)), show_fov);
+
+		DoAimbot(w2s_neckpos, sqrt(abs(w2s_headpos.y - w2s_neckpos.y)), show_fov, is_visible);
 
 #ifdef  _DEBUG
 		char ent_text[256];
-		sprintf(ent_text, xorstr_("%s --> %d		%f  %f  %f"), name, health, headpos.x, headpos.y, headpos.z);
+		sprintf(ent_text, xorstr_("%s --> %d"), name, health);
 		DrawStrokeText(30, 100 + 16*ent_idx, &White, ent_text);
 		ent_idx++;
 #endif //  _DEBUG
 		
 
 		RGBA color = { 255, 255, 255, 255 };
-		if ((ent_team == localplayer_team && ally_box && ally_esp) || (ent_team != localplayer_team && enemy_box && enemy_esp)) {
+		if ((ent_team == localplayer_team && ally_box && ally_esp && ((ally_esp_visible && is_visible) || !ally_esp_visible))
+			|| (ent_team != localplayer_team && enemy_box && enemy_esp && ((enemy_esp_visible && is_visible) || !enemy_esp_visible))) {
 			DrawEspBox2D(w2s_absOrigin, w2s_headpos, &color, 1);
 		}
 
-		if ((ent_team == localplayer_team && ally_name && ally_esp) || (ent_team != localplayer_team && enemy_name && enemy_esp)) {
+		if ((ent_team == localplayer_team && ally_name && ally_esp && ((ally_esp_visible && is_visible) || !ally_esp_visible))
+			|| (ent_team != localplayer_team && enemy_name && enemy_esp && ((enemy_esp_visible && is_visible) || !enemy_esp_visible))) {
 			DrawNameTag(w2s_absOrigin, w2s_headpos, name);
 		}
 
-		if ((ent_team == localplayer_team && ally_esp_health_bar && ally_esp) || (ent_team != localplayer_team && enemy_esp_health_bar && enemy_esp)) {
+		if ((ent_team == localplayer_team && ally_esp_health_bar && ally_esp && ((ally_esp_visible && is_visible) || !ally_esp_visible))
+			|| (ent_team != localplayer_team && enemy_esp_health_bar && enemy_esp && ((enemy_esp_visible && is_visible) || !enemy_esp_visible))) {
 			DrawHealthBar(w2s_absOrigin, w2s_headpos, health);
 		}
 
-		if ((ent_team == localplayer_team && ally_skeleton && ally_esp) || (ent_team != localplayer_team && enemy_skeleton && enemy_esp)) {
+		if ((ent_team == localplayer_team && ally_skeleton && ally_esp && ((ally_esp_visible && is_visible) || !ally_esp_visible))
+			|| (ent_team != localplayer_team && enemy_skeleton && enemy_esp && ((enemy_esp_visible && is_visible) || !enemy_esp_visible))) {
 			DrawBones(bonematrix_addr, &color, 1);
 		}
 	}
@@ -181,6 +211,8 @@ void DrawMenu() {
 	ImGui::Separator();
 
 	ImGui::Checkbox("Ally ESP", &ally_esp);
+	ImGui::SameLine();
+	ImGui::Checkbox("Visible only##ally", &ally_esp_visible);
 	ImGui::Checkbox("Box##ally", &ally_box);
 	ImGui::Checkbox("Skeleton##ally", &ally_skeleton);
 	ImGui::Checkbox("Healthbar##ally", &ally_esp_health_bar);
@@ -188,6 +220,8 @@ void DrawMenu() {
 
 	ImGui::Separator();
 	ImGui::Checkbox("Enemy ESP", &enemy_esp);
+	ImGui::SameLine();
+	ImGui::Checkbox("Visible only##enemy", &enemy_esp_visible);
 	ImGui::Checkbox("Box##enemy", &enemy_box);
 	ImGui::Checkbox("Skeleton##enemy", &enemy_skeleton);
 	ImGui::Checkbox("Healthbar##enemy", &enemy_esp_health_bar);
@@ -197,6 +231,7 @@ void DrawMenu() {
 	ImGui::Checkbox("Aimbot", &aimbot);
 	ImGui::SameLine();
 	ImGui::Checkbox("Show FOV", &show_fov);
+	ImGui::Checkbox("Visible only##aimbot", &aim_visible);
 	ImGui::SliderFloat("FOV", &aim_fov, 1.f, 30.f, "%1.f", 1.f);
 	ImGui::SliderFloat("Smoothing", &smooth, 0.f, 100.f, "%1.f", 1.f);
 
@@ -465,6 +500,9 @@ int main() {
 	}
 
 	Game::handle = OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, false, Game::PID);
+	DWORD size = MAX_PATH;
+	QueryFullProcessImageNameA(Game::handle, 0, Game::path, &size);
+	Game::path[strlen(Game::path) - 7] = '\0';
 	
 	std::string s = RandomString(10);
 	OverlayWindow::Name = s.c_str();
