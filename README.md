@@ -27,8 +27,7 @@ Press HOME to trigger the aimbot (keeping this keybind for testing)<br>
 As i use an overlay you can easily stream your game with obs/discord without anyone seeing the ESP.<br>
 
 # Screenshots
-Demo video :<br>
-![demo.gif](Screenshots/demo.gif)
+[Demo video](https://streamable.com/8dg58q)<br>
 
 ESP :<br>
 ![ESP.png](Screenshots/ESP.png)
