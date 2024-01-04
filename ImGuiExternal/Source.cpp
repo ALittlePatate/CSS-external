@@ -75,6 +75,10 @@ void Draw() {
 	RGBA Cyan = { 0, 231, 255, 255 };
 	if (crosshair) DrawCircleFilled(Process::WindowWidth/2, Process::WindowHeight/2, 3, &Cyan);
 
+	if (!Game::client || !Game::engine) {
+		init_modules();
+	}
+
 	char map_name[256];
 	static bool parsed_map = false;
 	static std::string map_name_old = "";
@@ -87,6 +91,8 @@ void Draw() {
 		map_name[j] = c;
 	}
 
+	if (map_name[0] == '\0')
+		return;
 	if (std::string(map_name) != map_name_old || !parsed_map) {
 		parsed_map = _bsp_parser.load_map(std::string(Game::path) + std::string("cstrike\\maps"), map_name);
 		map_name_old = std::string(map_name);
@@ -97,9 +103,6 @@ void Draw() {
 	}
 
 	RGBA White = { 255, 255, 255, 255 };
-	if (!Game::client || !Game::engine) {
-		init_modules();
-	}
 
 	uintptr_t entity_list = Game::client + ENTITY_LIST;
 	uintptr_t localplayer = RPM<uintptr_t>(Game::client + LOCALPLAYER);
@@ -134,7 +137,9 @@ void Draw() {
 			continue;
 		}
 
-		bool is_visible = _bsp_parser.is_visible(vector3{ pos.x, pos.y, pos.z + 66 }, vector3{ absOrigin.x, absOrigin.y, absOrigin.z + 66 });
+		bool is_visible = true;
+		if (parsed_map && std::string(map_name) != "cs_office.bsp")
+			is_visible = _bsp_parser.is_visible(vector3{pos.x, pos.y, pos.z + 66}, vector3{absOrigin.x, absOrigin.y, absOrigin.z + 66});
 		
 		//getting name
 		DWORD list = RPM<DWORD>(Game::client + NAME_LIST) + 0x38;
