@@ -140,7 +140,7 @@ void Draw() {
 		}
 
 		bool is_visible = true;
-		if (parsed_map && std::string(map_name) != "cs_office.bsp")
+		if (parsed_map)
 			is_visible = _bsp_parser.is_visible(vector3{pos.x, pos.y, pos.z + 66}, vector3{absOrigin.x, absOrigin.y, absOrigin.z + 66});
 		
 		//getting name
