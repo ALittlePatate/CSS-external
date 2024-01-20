@@ -83,7 +83,7 @@ void Draw() {
 	static bool parsed_map = false;
 	static std::string map_name_old = "";
 	for (int j = 0; j < 256; j++) {
-		char c = RPM<char>(Game::engine + MAP_NAME + j*sizeof(char));
+		char c = RPM<char>(Game::engine + MAP_NAME + j);
 		if (c == '\0') {
 			map_name[j] = '\0';
 			break;
@@ -147,7 +147,7 @@ void Draw() {
 		DWORD list = RPM<DWORD>(Game::client + NAME_LIST) + 0x38;
 		char name[256];
 		for (int j = 0; j < 256; j++) {
-			char c = RPM<char>(list + 0x140 * i + j*sizeof(char));
+			char c = RPM<char>(list + 0x140 * i + j);
 			if (c == '\0') {
 				name[j] = '\0';
 				break;
