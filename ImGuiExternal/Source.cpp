@@ -177,7 +177,8 @@ void Draw() {
 			continue;
 		}
 
-		DoAimbot(w2s_neckpos, sqrt(abs(w2s_headpos.y - w2s_neckpos.y)), show_fov, is_visible);
+		if (ent_team != localplayer_team)
+			DoAimbot(w2s_neckpos, sqrt(abs(w2s_headpos.y - w2s_neckpos.y)), show_fov, is_visible);
 
 #ifdef  _DEBUG
 		char ent_text[256];
